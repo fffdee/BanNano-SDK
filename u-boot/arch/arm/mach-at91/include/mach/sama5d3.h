@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Chip-specific header file for the SAMA5D3 family
  *
@@ -7,6 +6,8 @@
  *
  * Definitions for the SoC:
  * SAMA5D3
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef SAMA5D3_H
@@ -185,7 +186,7 @@
 #define CPU_HAS_PCR
 
 /* Timer */
-#define CFG_SYS_TIMER_COUNTER	0xfffffe3c
+#define CONFIG_SYS_TIMER_COUNTER	0xfffffe3c
 
 /*
  * PMECC table in ROM

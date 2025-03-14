@@ -1,11 +1,12 @@
-/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * OMAP EHCI port support
  * Based on LINUX KERNEL
  * drivers/usb/host/ehci-omap.c and drivers/mfd/omap-usb-host.c
  *
- * Copyright (C) 2011 Texas Instruments Incorporated - https://www.ti.com
+ * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com
  * Author: Govindraj R <govindraj.raja@ti.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0
  */
 
 #ifndef _OMAP4_EHCI_H_

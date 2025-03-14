@@ -1,18 +1,13 @@
-// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2016 Google, Inc
+ *
+ * SPDX-License-Identifier:	GPL-2.0
  */
-
-#define LOG_CATEGORY	UCLASS_RAM
 
 #include <common.h>
 #include <dm.h>
-#include <init.h>
-#include <log.h>
-#include <spl.h>
 #include <syscon.h>
 #include <asm/cpu.h>
-#include <asm/global_data.h>
 #include <asm/gpio.h>
 #include <asm/intel_regs.h>
 #include <asm/mrc_common.h>
@@ -28,7 +23,7 @@ static const char *const ecc_decoder[] = {
 	"active"
 };
 
-phys_size_t mrc_common_board_get_usable_ram_top(phys_size_t total_size)
+ulong mrc_common_board_get_usable_ram_top(ulong total_size)
 {
 	struct memory_info *info = &gd->arch.meminfo;
 	uintptr_t dest_addr = 0;
@@ -53,7 +48,7 @@ phys_size_t mrc_common_board_get_usable_ram_top(phys_size_t total_size)
 
 	dest_addr = largest->start + largest->size;
 
-	return (phys_size_t)dest_addr;
+	return (ulong)dest_addr;
 }
 
 void mrc_common_dram_init_banksize(void)
@@ -147,10 +142,12 @@ int mrc_locate_spd(struct udevice *dev, int size, const void **spd_datap)
 
 	ret = gpio_request_list_by_name(dev, "board-id-gpios", desc,
 					ARRAY_SIZE(desc), GPIOD_IS_IN);
-	if (ret < 0)
-		return log_msg_ret("gpio", ret);
+	if (ret < 0) {
+		debug("%s: gpio ret=%d\n", __func__, ret);
+		return ret;
+	}
 	spd_index = dm_gpio_get_values_as_int(desc, ret);
-	log_debug("spd index %d\n", spd_index);
+	debug("spd index %d\n", spd_index);
 
 	node = fdt_first_subnode(blob, dev_of_offset(dev));
 	if (node < 0)
@@ -201,7 +198,7 @@ static int sdram_initialise(struct udevice *dev, struct udevice *me_dev,
 
 	debug("PEI data at %p:\n", pei_data);
 
-	data = (char *)CFG_X86_MRC_ADDR;
+	data = (char *)CONFIG_X86_MRC_ADDR;
 	if (data) {
 		int rv;
 		ulong start;
@@ -246,34 +243,24 @@ static int sdram_initialise(struct udevice *dev, struct udevice *me_dev,
 	      version >> 24 , (version >> 16) & 0xff,
 	      (version >> 8) & 0xff, version & 0xff);
 
+#if CONFIG_USBDEBUG
+	/* mrc.bin reconfigures USB, so reinit it to have debug */
+	early_usbdebug_init();
+#endif
+
 	return 0;
 }
 
 int mrc_common_init(struct udevice *dev, void *pei_data, bool use_asm_linkage)
 {
 	struct udevice *me_dev;
-	int ret, delay;
+	int ret;
 
 	ret = syscon_get_by_driver_data(X86_SYSCON_ME, &me_dev);
 	if (ret)
 		return ret;
 
-	delay = dev_read_u32_default(dev, "fspm,training-delay", 0);
-	if (spl_phase() == PHASE_SPL) {
-		if (delay)
-			printf("SDRAM training (%d seconds)...", delay);
-		else
-			log_debug("SDRAM init...");
-	} else {
-		if (delay)
-			printf("(%d seconds)...", delay);
-	}
-
 	ret = sdram_initialise(dev, me_dev, pei_data, use_asm_linkage);
-	if (delay)
-		printf("done\n");
-	else
-		log_debug("done\n");
 	if (ret)
 		return ret;
 	quick_ram_check();

@@ -1,25 +1,24 @@
-// SPDX-License-Identifier: GPL-2.0
 /*
  * (C) Copyright 2017 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:	GPL-2.0
  */
 
 #include <common.h>
 #include <clk-uclass.h>
 #include <dm.h>
 #include <errno.h>
-#include <log.h>
-#include <malloc.h>
 #include <syscon.h>
 #include <asm/io.h>
-#include <asm/arch-rockchip/clock.h>
-#include <asm/arch-rockchip/cru_rk3128.h>
-#include <asm/arch-rockchip/hardware.h>
+#include <asm/arch/clock.h>
+#include <asm/arch/cru_rk3128.h>
+#include <asm/arch/hardware.h>
 #include <bitfield.h>
-#include <dm/device-internal.h>
 #include <dm/lists.h>
 #include <dt-bindings/clock/rk3128-cru.h>
-#include <linux/delay.h>
 #include <linux/log2.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 enum {
 	VCO_MAX_HZ	= 2400U * 1000000,
@@ -438,7 +437,7 @@ static ulong rk3128_vop_set_clk(struct rk3128_cru *cru, ulong clk_id, uint hz)
 			     VIO1_SEL_GPLL << VIO1_PLL_SHIFT |
 			     (src_clk_div - 1) << VIO1_DIV_SHIFT);
 		break;
-	case DCLK_VOP:
+	case DCLK_LCDC:
 		if (pll_para_config(hz, &cpll_config))
 			return -1;
 		rkclk_set_pll(cru, CLK_CODEC, &cpll_config);
@@ -471,7 +470,7 @@ static ulong rk3128_vop_get_rate(struct rk3128_cru *cru, ulong clk_id)
 		div = (con >> 8) & 0x1f;
 		parent = GPLL_HZ;
 		break;
-	case DCLK_VOP:
+	case DCLK_LCDC:
 		con = readl(&cru->cru_clksel_con[27]);
 		div = (con >> 8) & 0xfff;
 		parent = rkclk_pll_get_rate(cru, CLK_CODEC);
@@ -497,7 +496,7 @@ static ulong rk3128_clk_get_rate(struct clk *clk)
 		return rk3128_peri_get_pclk(priv->cru, clk->id);
 	case SCLK_SARADC:
 		return rk3128_saradc_get_clk(priv->cru);
-	case DCLK_VOP:
+	case DCLK_LCDC:
 	case ACLK_VIO0:
 	case ACLK_VIO1:
 		return rk3128_vop_get_rate(priv->cru, clk->id);
@@ -515,7 +514,7 @@ static ulong rk3128_clk_set_rate(struct clk *clk, ulong rate)
 	switch (clk->id) {
 	case 0 ... 63:
 		return 0;
-	case DCLK_VOP:
+	case DCLK_LCDC:
 	case ACLK_VIO0:
 	case ACLK_VIO1:
 		new_rate = rk3128_vop_set_clk(priv->cru,
@@ -547,19 +546,11 @@ static struct clk_ops rk3128_clk_ops = {
 	.set_rate	= rk3128_clk_set_rate,
 };
 
-static int rk3128_clk_of_to_plat(struct udevice *dev)
-{
-	struct rk3128_clk_priv *priv = dev_get_priv(dev);
-
-	priv->cru = dev_read_addr_ptr(dev);
-
-	return 0;
-}
-
 static int rk3128_clk_probe(struct udevice *dev)
 {
 	struct rk3128_clk_priv *priv = dev_get_priv(dev);
 
+	priv->cru = (struct rk3128_cru *)dev_read_addr(dev);
 	rkclk_init(priv->cru);
 
 	return 0;
@@ -582,7 +573,7 @@ static int rk3128_clk_bind(struct udevice *dev)
 						    cru_glb_srst_fst_value);
 		priv->glb_srst_snd_value = offsetof(struct rk3128_cru,
 						    cru_glb_srst_snd_value);
-		dev_set_priv(sys_child, priv);
+		sys_child->priv = priv;
 	}
 
 	return 0;
@@ -598,8 +589,7 @@ U_BOOT_DRIVER(rockchip_rk3128_cru) = {
 	.name		= "clk_rk3128",
 	.id		= UCLASS_CLK,
 	.of_match	= rk3128_clk_ids,
-	.priv_auto	= sizeof(struct rk3128_clk_priv),
-	.of_to_plat = rk3128_clk_of_to_plat,
+	.priv_auto_alloc_size = sizeof(struct rk3128_clk_priv),
 	.ops		= &rk3128_clk_ops,
 	.bind		= rk3128_clk_bind,
 	.probe		= rk3128_clk_probe,

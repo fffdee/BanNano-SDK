@@ -1,19 +1,48 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * (C) Copyright 2016 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
  */
 
 #ifndef _ROCKCHIP_COMMON_H_
 #define _ROCKCHIP_COMMON_H_
 #include <linux/sizes.h>
 
-#ifndef CFG_CPUID_OFFSET
-#define CFG_CPUID_OFFSET	0x7
+#ifndef CONFIG_SPL_BUILD
+#include <config_distro_defaults.h>
+
+/* First try to boot from SD (index 0), then eMMC (index 1) */
+#if CONFIG_IS_ENABLED(CMD_MMC)
+	#define BOOT_TARGET_MMC(func) \
+		func(MMC, mmc, 0) \
+		func(MMC, mmc, 1)
+#else
+	#define BOOT_TARGET_MMC(func)
 #endif
 
-#ifndef CONFIG_SPL_BUILD
+#if CONFIG_IS_ENABLED(CMD_USB)
+	#define BOOT_TARGET_USB(func) func(USB, usb, 0)
+#else
+	#define BOOT_TARGET_USB(func)
+#endif
 
-#define BOOT_TARGETS	"mmc1 mmc0 nvme scsi usb pxe dhcp spi"
+#if CONFIG_IS_ENABLED(CMD_PXE)
+	#define BOOT_TARGET_PXE(func) func(PXE, pxe, na)
+#else
+	#define BOOT_TARGET_PXE(func)
+#endif
+
+#if CONFIG_IS_ENABLED(CMD_DHCP)
+	#define BOOT_TARGET_DHCP(func) func(DHCP, dhcp, na)
+#else
+	#define BOOT_TARGET_DHCP(func)
+#endif
+
+#define BOOT_TARGET_DEVICES(func) \
+	BOOT_TARGET_MMC(func) \
+	BOOT_TARGET_USB(func) \
+	BOOT_TARGET_PXE(func) \
+	BOOT_TARGET_DHCP(func)
 
 #ifdef CONFIG_ARM64
 #define ROOT_UUID "B921B045-1DF0-41C3-AF44-4C6F280D3FAE;\0"
@@ -29,5 +58,7 @@
 	"name=rootfs,size=-,uuid="ROOT_UUID
 
 #endif
+
+#define CONFIG_DISPLAY_BOARDINFO_LATE
 
 #endif /* _ROCKCHIP_COMMON_H_ */

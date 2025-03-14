@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * at91sam9g45-corvus.dts Device Tree file fir Siemens corvus board
  * (C) Copyright 2016 Heiko Schocher <hs@denx.de>
@@ -8,6 +7,8 @@
  *
  *  Copyright (C) 2011 Atmel,
  *                2011 Nicolas Ferre <nicolas.ferre@atmel.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 /dts-v1/;
 #include "at91sam9g45.dtsi"
@@ -17,7 +18,7 @@
 	compatible = "atmel,at91sam9m10g45ek", "atmel,at91sam9g45", "atmel,at91sam9";
 
 	chosen {
-		bootph-all;
+		u-boot,dm-pre-reloc;
 		stdout-path = &dbgu;
 	};
 
@@ -38,7 +39,7 @@
 	ahb {
 		apb {
 			dbgu: serial@ffffee00 {
-				bootph-all;
+				u-boot,dm-pre-reloc;
 				status = "okay";
 			};
 

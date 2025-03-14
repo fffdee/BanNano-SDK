@@ -1,6 +1,7 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2017 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:     GPL-2.0+
  */
 
 /dts-v1/;
@@ -13,11 +14,6 @@
 
 	chosen {
 		stdout-path = &uart2;
-	};
-
-	memory@60000000 {
-		device_type = "memory";
-		reg = <0x60000000 0x40000000>;
 	};
 
 	vcc5v0_otg: vcc5v0-otg-drv {
@@ -40,11 +36,6 @@
 		regulator-max-microvolt = <5000000>;
 		regulator-always-on;
 	};
-};
-
-&emmc {
-	fifo-mode;
-	status = "okay";
 };
 
 &i2c1 {
@@ -84,16 +75,21 @@
 	status = "okay";
 };
 
+&emmc {
+	fifo-mode;
+	status = "okay";
+};
+
 &pinctrl {
 	usb_otg {
 		otg_vbus_drv: host-vbus-drv {
-			rockchip,pins = <0 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <0 26 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
 	usb_host {
 		host_vbus_drv: host-vbus-drv {
-			rockchip,pins = <2 RK_PC7 RK_FUNC_GPIO &pcfg_pull_none>;
+			rockchip,pins = <2 23 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 };

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * pinmux setup for siemens rut board
  *
@@ -8,7 +7,9 @@
  * Based on:
  * u-boot:/board/ti/am335x/mux.c
  *
- * Copyright (C) 2011 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>

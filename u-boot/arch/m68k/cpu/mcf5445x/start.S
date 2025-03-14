@@ -1,14 +1,18 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (C) 2003	Josef Baumgartner <josef.baumgartner@telex.de>
  * Based on code from Bernhard Kuhn <bkuhn@metrowerks.com>
  *
  * Copyright 2010-2012 Freescale Semiconductor, Inc.
  * TsiChung Liew (Tsi-Chung.Liew@freescale.com)
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
+#include <common.h>
 #include <asm-offsets.h>
 #include <config.h>
+#include <timestamp.h>
+#include "version.h"
 #include <asm/cache.h>
 
 #define _START	_start
@@ -25,11 +29,11 @@
 	rte;
 
 #if defined(CONFIG_SERIAL_BOOT)
-#define ASM_DRAMINIT	(asm_dram_init - CONFIG_TEXT_BASE + \
-	CFG_SYS_INIT_RAM_ADDR)
-#define ASM_DRAMINIT_N	(asm_dram_init - CONFIG_TEXT_BASE)
-#define ASM_SBF_IMG_HDR	(asm_sbf_img_hdr - CONFIG_TEXT_BASE + \
-	CFG_SYS_INIT_RAM_ADDR)
+#define ASM_DRAMINIT	(asm_dram_init - CONFIG_SYS_TEXT_BASE + \
+	CONFIG_SYS_INIT_RAM_ADDR)
+#define ASM_DRAMINIT_N	(asm_dram_init - CONFIG_SYS_TEXT_BASE)
+#define ASM_SBF_IMG_HDR	(asm_sbf_img_hdr - CONFIG_SYS_TEXT_BASE + \
+	CONFIG_SYS_INIT_RAM_ADDR)
 #endif
 
 .text
@@ -43,16 +47,16 @@ _vectors:
 
 INITSP:	.long	0			/* Initial SP	*/
 #ifdef CONFIG_CF_SBF
-INITPC:	.long	ASM_DRAMINIT		/* Initial PC	*/
+INITPC:	.long	ASM_DRAMINIT		/* Initial PC 	*/
 #endif
 #ifdef CONFIG_SYS_NAND_BOOT
-INITPC:	.long	ASM_DRAMINIT_N		/* Initial PC	*/
+INITPC:	.long	ASM_DRAMINIT_N		/* Initial PC 	*/
 #endif
 
 #else
 
 INITSP:	.long	0			/* Initial SP	*/
-INITPC:	.long	_START			/* Initial PC	*/
+INITPC:	.long	_START			/* Initial PC 	*/
 
 #endif
 
@@ -115,25 +119,25 @@ vector192_255:
 asm_sbf_img_hdr:
 	.long	0x00000000		/* checksum, not yet implemented */
 	.long	0x00040000		/* image length */
-	.long	CONFIG_TEXT_BASE	/* image to be relocated at */
+	.long	CONFIG_SYS_TEXT_BASE	/* image to be relocated at */
 
 asm_dram_init:
 	move.w	#0x2700,%sr		/* Mask off Interrupt */
 
 #ifdef CONFIG_SYS_NAND_BOOT
 	/* for assembly stack */
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_RAM_CTRL), %d0
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_RAM_CTRL), %d0
 	movec	%d0, %RAMBAR1
 
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_SP_OFFSET), %sp
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET), %sp
 	clr.l	%sp@-
 #endif
 
 #ifdef CONFIG_CF_SBF
-	move.l	#CFG_SYS_INIT_RAM_ADDR, %d0
+	move.l	#CONFIG_SYS_INIT_RAM_ADDR, %d0
 	movec	%d0, %VBR
 
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_RAM_CTRL), %d0
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_RAM_CTRL), %d0
 	movec	%d0, %RAMBAR1
 
 	/* initialize general use internal ram */
@@ -144,7 +148,7 @@ asm_dram_init:
 	move.l	%d0, (%a2)
 
 	/* invalidate and disable cache */
-	move.l	#(CFG_SYS_ICACHE_INV + CFG_SYS_DCACHE_INV), %d0
+	move.l	#(CONFIG_SYS_ICACHE_INV + CONFIG_SYS_DCACHE_INV), %d0
 	movec	%d0, %CACR		/* Invalidate cache */
 	move.l	#0, %d0
 	movec	%d0, %ACR0
@@ -152,17 +156,17 @@ asm_dram_init:
 	movec	%d0, %ACR2
 	movec	%d0, %ACR3
 
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_SP_OFFSET), %sp
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_SP_OFFSET), %sp
 	clr.l	%sp@-
 
-#ifdef CFG_SYS_CS0_BASE
+#ifdef CONFIG_SYS_CS0_BASE
 	/* Must disable global address */
 	move.l	#0xFC008000, %a1
-	move.l	#(CFG_SYS_CS0_BASE), (%a1)
+	move.l	#(CONFIG_SYS_CS0_BASE), (%a1)
 	move.l	#0xFC008008, %a1
-	move.l	#(CFG_SYS_CS0_CTRL), (%a1)
+	move.l	#(CONFIG_SYS_CS0_CTRL), (%a1)
 	move.l	#0xFC008004, %a1
-	move.l	#(CFG_SYS_CS0_MASK), (%a1)
+	move.l	#(CONFIG_SYS_CS0_MASK), (%a1)
 #endif
 #endif /* CONFIG_CF_SBF */
 
@@ -199,6 +203,10 @@ asm_dspi_init:
 	move.b	#0x80, (%a2)
 #endif
 
+#ifdef CONFIG_MCF5445x
+	move.l	#0xFC0A4063, %a0
+	move.b	#0x7F, (%a0)
+#endif
 	/* Configure DSPI module */
 	move.l	#0xFC05C000, %a0
 	move.l	#0x80FF0C00, (%a0)	/* Master, clear TX/RX FIFO */
@@ -206,6 +214,9 @@ asm_dspi_init:
 	move.l	#0xFC05C00C, %a0
 #ifdef CONFIG_MCF5441x
 	move.l	#0x3E000016, (%a0)
+#endif
+#ifdef CONFIG_MCF5445x
+	move.l	#0x3E000011, (%a0)
 #endif
 
 	move.l	#0xFC05C034, %a2	/* dtfr */
@@ -215,8 +226,8 @@ asm_dspi_init:
 	move.l	(%a1)+, %d5
 	move.l	(%a1), %a4
 
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_SBFHDR_DATA_OFFSET), %a0
-	move.l	#(CFG_SYS_SBFHDR_SIZE), %d4
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_SBFHDR_DATA_OFFSET), %a0
+	move.l	#(CONFIG_SYS_SBFHDR_SIZE), %d4
 
 	move.l	#0xFC05C02C, %a1	/* dspi status */
 
@@ -270,7 +281,7 @@ asm_dspi_rd_loop2:
 	jsr	asm_dspi_rd_status
 
 	/* jump to memory and execute */
-	move.l	#(CONFIG_TEXT_BASE + 0x400), %a0
+	move.l	#(CONFIG_SYS_TEXT_BASE + 0x400), %a0
 	jmp	(%a0)
 
 asm_dspi_wr_status:
@@ -297,7 +308,7 @@ asm_dspi_rd_status:
 	/* copy 4 boot pages to dram as soon as possible */
 	/* each page is 996 bytes (1056 total with 60 ECC bytes */
 	move.l  #0x00000000, %a1	/* src */
-	move.l	#CONFIG_TEXT_BASE, %a2		/* dst */
+	move.l	#CONFIG_SYS_TEXT_BASE, %a2		/* dst */
 	move.l	#0x3E0, %d0		/* sz in long */
 
 asm_boot_nand_copy:
@@ -333,14 +344,14 @@ asm_nand_init:
 	movec	%d0, %ACR2
 	movec	%d0, %ACR3
 
-#ifdef CFG_SYS_CS0_BASE
+#ifdef CONFIG_SYS_CS0_BASE
 	/* Must disable global address */
 	move.l	#0xFC008000, %a1
-	move.l	#(CFG_SYS_CS0_BASE), (%a1)
+	move.l	#(CONFIG_SYS_CS0_BASE), (%a1)
 	move.l	#0xFC008008, %a1
-	move.l	#(CFG_SYS_CS0_CTRL), (%a1)
+	move.l	#(CONFIG_SYS_CS0_CTRL), (%a1)
 	move.l	#0xFC008004, %a1
-	move.l	#(CFG_SYS_CS0_MASK), (%a1)
+	move.l	#(CONFIG_SYS_CS0_MASK), (%a1)
 #endif
 
 	/* NAND port configuration */
@@ -380,7 +391,7 @@ asm_nand_init:
 	move.l	#4, %d2			/* start at 4 */
 	move.l  #0xFC0FFF04, %a0	/* cmd2 */
 	move.l  #0xFC0FFF0C, %a1	/* rar */
-	move.l	#(CONFIG_TEXT_BASE + 0xF80), %a2
+	move.l	#(CONFIG_SYS_TEXT_BASE + 0xF80), %a2
 
 asm_nand_read:
 	move.l	#0x11000000, %d0	/* rar */
@@ -418,7 +429,7 @@ asm_nand_copy:
 	bgt	asm_nand_read
 
 	/* jump to memory and execute */
-	move.l	#(CONFIG_TEXT_BASE + 0x400), %a0
+	move.l	#(CONFIG_SYS_TEXT_BASE + 0x400), %a0
 	jmp	(%a0)
 
 #endif			/* CONFIG_SYS_NAND_BOOT */
@@ -441,10 +452,10 @@ _start:
 	move.w	#0x2700,%sr		/* Mask off Interrupt */
 
 	/* Set vector base register at the beginning of the Flash */
-	move.l	#CFG_SYS_FLASH_BASE, %d0
+	move.l	#CONFIG_SYS_FLASH_BASE, %d0
 	movec	%d0, %VBR
 
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_RAM_CTRL), %d0
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_RAM_CTRL), %d0
 	movec	%d0, %RAMBAR1
 
 	/* initialize general use internal ram */
@@ -455,7 +466,7 @@ _start:
 	move.l	%d0, (%a2)
 
 	/* invalidate and disable cache */
-	move.l	#(CFG_SYS_ICACHE_INV + CFG_SYS_DCACHE_INV), %d0
+	move.l	#(CONFIG_SYS_ICACHE_INV + CONFIG_SYS_DCACHE_INV), %d0
 	movec	%d0, %CACR		/* Invalidate cache */
 	move.l	#0, %d0
 	movec	%d0, %ACR0
@@ -463,7 +474,7 @@ _start:
 	movec	%d0, %ACR2
 	movec	%d0, %ACR3
 #else
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_RAM_CTRL), %d0
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_RAM_CTRL), %d0
 	movec	%d0, %RAMBAR1
 #endif
 
@@ -471,7 +482,7 @@ _start:
 	move.l	#__got_start, %a5
 
 	/* setup stack initially on top of internal static ram  */
-	move.l	#(CFG_SYS_INIT_RAM_ADDR + CFG_SYS_INIT_RAM_SIZE), %sp
+	move.l	#(CONFIG_SYS_INIT_RAM_ADDR + CONFIG_SYS_INIT_RAM_SIZE), %sp
 
 	/*
 	 * if configured, malloc_f arena will be reserved first,
@@ -504,7 +515,7 @@ _start:
 /******************************************************************************/
 
 /*
- * void relocate_code(addr_sp, gd, addr_moni)
+ * void relocate_code (addr_sp, gd, addr_moni)
  *
  * This "function" does not return, instead it continues in RAM
  * after relocating the monitor code.
@@ -532,39 +543,6 @@ relocate_code:
 	cmp.l	%a1,%a2
 	bgt.s	1b
 
-#define R_68K_32	1
-#define R_68K_RELATIVE	22
-
-	move.l #(__rel_dyn_start), %a1
-	move.l #(__rel_dyn_end), %a2
-
-fixloop:
-	move.l	(%a1)+, %d1	/* Elf32_Rela r_offset */
-	move.l	(%a1)+, %d2	/* Elf32_Rela r_info */
-	move.l	(%a1)+, %d3	/* Elf32_Rela r_addend */
-
-	andi.l	#0xff, %d2
-	cmp.l	#R_68K_32, %d2
-	beq.s	fixup
-	cmp.l	#R_68K_RELATIVE, %d2
-	beq.s	fixup
-
-	bra	fixnext
-
-fixup:
-	/* relative fix: store addend plus offset at dest location */
-	move.l	%a0, %a3
-	add.l	%d1, %a3
-	sub.l   #CONFIG_SYS_MONITOR_BASE, %a3
-	move.l	(%a3), %d4
-	add.l	%a0, %d4
-	sub.l   #CONFIG_SYS_MONITOR_BASE, %d4
-	move.l	%d4, (%a3)
-
-fixnext:
-	cmp.l	%a1, %a2
-	bge.s	fixloop
-
 /*
  * We are done. Do not return, instead branch to second part of board
  * initialization, now running from RAM.
@@ -579,8 +557,10 @@ clear_bss:
 	/*
 	 * Now clear BSS segment
 	 */
-	move.l	#(_sbss), %a1
-	move.l	#(_ebss), %d1
+	move.l	%a0, %a1
+	add.l	#(_sbss - CONFIG_SYS_MONITOR_BASE),%a1
+	move.l	%a0, %d1
+	add.l	#(_ebss - CONFIG_SYS_MONITOR_BASE),%d1
 6:
 	clr.l	(%a1)+
 	cmp.l	%a1,%d1
@@ -589,10 +569,24 @@ clear_bss:
 	/*
 	 * fix got table in RAM
 	 */
-	move.l	#(__got_start), %a5	/* fix got pointer register a5 */
+	move.l	%a0, %a1
+	add.l	#(__got_start - CONFIG_SYS_MONITOR_BASE),%a1
+	move.l	%a1,%a5			/* fix got pointer register a5 */
+
+	move.l	%a0, %a2
+	add.l	#(__got_end - CONFIG_SYS_MONITOR_BASE),%a2
+
+7:
+	move.l	(%a1),%d1
+	sub.l	#_start,%d1
+	add.l	%a0,%d1
+	move.l	%d1,(%a1)+
+	cmp.l	%a2, %a1
+	bne	7b
 
 	/* calculate relative jump to board_init_r in ram */
-	move.l	#(board_init_r), %a1
+	move.l	%a0, %a1
+	add.l	#(board_init_r - CONFIG_SYS_MONITOR_BASE), %a1
 
 	/* set parameters for board_init_r */
 	move.l	%a0,-(%sp)		/* dest_addr */
@@ -624,4 +618,7 @@ _int_handler:
 
 /******************************************************************************/
 
+.globl version_string
+version_string:
+.ascii U_BOOT_VERSION_STRING, "\0"
 .align 4

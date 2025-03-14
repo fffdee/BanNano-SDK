@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2011-2013, NVIDIA Corporation.
+ *
+ * SPDX-License-Identifier:	GPL-2.0
  */
 
 #include <common.h>
 #include <dm.h>
 #include <errno.h>
-#include <log.h>
 #include <malloc.h>
 #include <panel.h>
 #include <syscon.h>
@@ -14,11 +14,10 @@
 #include <asm/io.h>
 #include <asm/arch/clock.h>
 #include <asm/arch-tegra/dc.h>
-#include <linux/delay.h>
-#include <linux/printk.h>
 #include "displayport.h"
 #include "sor.h"
-#include <linux/err.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 #define DEBUG_SOR 0
 
@@ -537,8 +536,7 @@ static int tegra_dc_sor_power_up(struct udevice *dev, int is_lvds)
 #if DEBUG_SOR
 static void dump_sor_reg(struct tegra_dc_sor_data *sor)
 {
-#define DUMP_REG(a) printk(BIOS_INFO, \
-		"%-32s  %03x  %08x\n",		\
+#define DUMP_REG(a) printk(BIOS_INFO, "%-32s  %03x  %08x\n",		\
 		#a, a, tegra_sor_readl(sor, a));
 
 	DUMP_REG(SUPER_STATE0);
@@ -672,8 +670,8 @@ static void tegra_dc_sor_config_panel(struct tegra_dc_sor_data *sor,
 			      CSTM_ROTCLK_DEFAULT_MASK |
 			      CSTM_LVDS_EN_ENABLE,
 			      2 << CSTM_ROTCLK_SHIFT |
-			      (is_lvds ? CSTM_LVDS_EN_ENABLE :
-			      CSTM_LVDS_EN_DISABLE));
+			      is_lvds ? CSTM_LVDS_EN_ENABLE :
+			      CSTM_LVDS_EN_DISABLE);
 
 	 tegra_dc_sor_config_pwm(sor, 1024, 1024);
 }
@@ -766,7 +764,7 @@ int tegra_dc_sor_attach(struct udevice *dc_dev, struct udevice *dev,
 
 	/* Use the first display controller */
 	debug("%s\n", __func__);
-	disp_ctrl = dev_read_addr_ptr(dc_dev);
+	disp_ctrl = (struct dc_ctlr *)dev_read_addr(dc_dev);
 
 	tegra_dc_sor_enable_dc(disp_ctrl);
 	tegra_dc_sor_config_panel(sor, 0, link_cfg, timing);
@@ -979,7 +977,7 @@ int tegra_dc_sor_detach(struct udevice *dc_dev, struct udevice *dev)
 
 	debug("%s\n", __func__);
 	/* Use the first display controller */
-	disp_ctrl = dev_read_addr_ptr(dev);
+	disp_ctrl = (struct dc_ctlr *)dev_read_addr(dev);
 
 	/* Sleep mode */
 	tegra_sor_writel(sor, SUPER_STATE1, SUPER_STATE1_ASY_HEAD_OP_SLEEP |
@@ -1043,12 +1041,12 @@ static int tegra_sor_set_backlight(struct udevice *dev, int percent)
 	return 0;
 }
 
-static int tegra_sor_of_to_plat(struct udevice *dev)
+static int tegra_sor_ofdata_to_platdata(struct udevice *dev)
 {
 	struct tegra_dc_sor_data *priv = dev_get_priv(dev);
 	int ret;
 
-	priv->base = dev_read_addr_ptr(dev);
+	priv->base = (void *)dev_read_addr(dev);
 
 	priv->pmc_base = (void *)syscon_get_first_range(TEGRA_SYSCON_PMC);
 	if (IS_ERR(priv->pmc_base))
@@ -1078,7 +1076,7 @@ U_BOOT_DRIVER(sor_tegra) = {
 	.name	= "sor_tegra",
 	.id	= UCLASS_VIDEO_BRIDGE,
 	.of_match = tegra_sor_ids,
-	.of_to_plat = tegra_sor_of_to_plat,
+	.ofdata_to_platdata = tegra_sor_ofdata_to_platdata,
 	.ops	= &tegra_sor_ops,
-	.priv_auto	= sizeof(struct tegra_dc_sor_data),
+	.priv_auto_alloc_size = sizeof(struct tegra_dc_sor_data),
 };

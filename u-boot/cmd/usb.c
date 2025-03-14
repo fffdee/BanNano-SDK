@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2001
  * Denis Peter, MPL AG Switzerland
@@ -8,11 +7,11 @@
  *
  * Most of this source has been derived from the Linux USB
  * project.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
-#include <blk.h>
-#include <bootstage.h>
 #include <command.h>
 #include <console.h>
 #include <dm.h>
@@ -318,18 +317,26 @@ static struct usb_device *usb_find_device(int devnum)
 	return NULL;
 }
 
-static inline const char *portspeed(int speed)
+static inline char *portspeed(int speed)
 {
+	char *speed_str;
+
 	switch (speed) {
 	case USB_SPEED_SUPER:
-		return "5 Gb/s";
+		speed_str = "5 Gb/s";
+		break;
 	case USB_SPEED_HIGH:
-		return "480 Mb/s";
+		speed_str = "480 Mb/s";
+		break;
 	case USB_SPEED_LOW:
-		return "1.5 Mb/s";
+		speed_str = "1.5 Mb/s";
+		break;
 	default:
-		return "12 Mb/s";
+		speed_str = "12 Mb/s";
+		break;
 	}
+
+	return speed_str;
 }
 
 /* shows the device tree recursively */
@@ -421,9 +428,7 @@ static void usb_show_tree_graph(struct usb_device *dev, char *pre)
 		 * Ignore emulators and block child devices, we only want
 		 * real devices
 		 */
-		if (udev &&
-		    (device_get_uclass_id(child) != UCLASS_BOOTDEV) &&
-		    (device_get_uclass_id(child) != UCLASS_USB_EMUL) &&
+		if ((device_get_uclass_id(child) != UCLASS_USB_EMUL) &&
 		    (device_get_uclass_id(child) != UCLASS_BLK)) {
 			usb_show_tree_graph(udev, pre);
 			pre[index] = 0;
@@ -558,8 +563,7 @@ static int usb_test(struct usb_device *dev, int port, char* arg)
  * usb boot command intepreter. Derived from diskboot
  */
 #ifdef CONFIG_USB_STORAGE
-static int do_usbboot(struct cmd_tbl *cmdtp, int flag, int argc,
-		      char *const argv[])
+static int do_usbboot(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	return common_diskboot(cmdtp, "usb", argc, argv);
 }
@@ -593,6 +597,16 @@ static void do_usb_start(void)
 	drv_usb_kbd_init();
 # endif
 #endif /* !CONFIG_DM_USB */
+#ifdef CONFIG_USB_HOST_ETHER
+# ifdef CONFIG_DM_ETH
+#  ifndef CONFIG_DM_USB
+#   error "You must use CONFIG_DM_USB if you want to use CONFIG_USB_HOST_ETHER with CONFIG_DM_ETH"
+#  endif
+# else
+	/* try to recognize ethernet devices immediately */
+	usb_ether_curr_dev = usb_host_eth_scan(1);
+# endif
+#endif
 }
 
 #ifdef CONFIG_DM_USB
@@ -606,12 +620,10 @@ static void usb_show_info(struct usb_device *udev)
 	     child;
 	     device_find_next_child(&child)) {
 		if (device_active(child) &&
-		    (device_get_uclass_id(child) != UCLASS_BOOTDEV) &&
 		    (device_get_uclass_id(child) != UCLASS_USB_EMUL) &&
 		    (device_get_uclass_id(child) != UCLASS_BLK)) {
 			udev = dev_get_parent_priv(child);
-			if (udev)
-				usb_show_info(udev);
+			usb_show_info(udev);
 		}
 	}
 }
@@ -620,10 +632,11 @@ static void usb_show_info(struct usb_device *udev)
 /******************************************************************************
  * usb command intepreter
  */
-static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
+static int do_usb(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
 	struct usb_device *udev = NULL;
 	int i;
+	extern char usb_started;
 
 	if (argc < 2)
 		return CMD_RET_USAGE;
@@ -683,7 +696,7 @@ static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 			 * have multiple controllers and the device numbering
 			 * starts at 1 on each bus.
 			 */
-			i = dectoul(argv[2], NULL);
+			i = simple_strtoul(argv[2], NULL, 10);
 			printf("config for device %d\n", i);
 			udev = usb_find_device(i);
 			if (udev == NULL) {
@@ -699,20 +712,20 @@ static int do_usb(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 	if (strncmp(argv[1], "test", 4) == 0) {
 		if (argc < 5)
 			return CMD_RET_USAGE;
-		i = dectoul(argv[2], NULL);
+		i = simple_strtoul(argv[2], NULL, 10);
 		udev = usb_find_device(i);
 		if (udev == NULL) {
 			printf("Device %d does not exist.\n", i);
 			return 1;
 		}
-		i = dectoul(argv[3], NULL);
+		i = simple_strtoul(argv[3], NULL, 10);
 		return usb_test(udev, i, argv[4]);
 	}
 #ifdef CONFIG_USB_STORAGE
 	if (strncmp(argv[1], "stor", 4) == 0)
 		return usb_stor_info();
 
-	return blk_common_cmd(argc, argv, UCLASS_USB, &usb_stor_curr_dev);
+	return blk_common_cmd(argc, argv, IF_TYPE_USB, &usb_stor_curr_dev);
 #else
 	return CMD_RET_USAGE;
 #endif /* CONFIG_USB_STORAGE */

@@ -1,13 +1,23 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (C) 2016 BayLibre, SAS
  * Author: Neil Armstrong <narmstrong@baylibre.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __MESON_ETH_H__
 #define __MESON_ETH_H__
 
-/* Generate an unique MAC address based on the HW serial */
-int meson_generate_serial_ethaddr(void);
+#include <phy.h>
+
+enum {
+	/* Use GXL Internal RMII PHY */
+	MESON_GXL_USE_INTERNAL_RMII_PHY = 1,
+};
+
+/* Configure the Ethernet MAC with the requested interface mode
+ * with some optional flags.
+ */
+void meson_gx_eth_init(phy_interface_t mode, unsigned int flags);
 
 #endif /* __MESON_ETH_H__ */

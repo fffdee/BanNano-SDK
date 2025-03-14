@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * Usefuls routines based on the LzmaTest.c file from LZMA SDK 4.65
  *
@@ -6,6 +5,8 @@
  * Luigi 'Comio' Mantellini (luigi.mantellini@idf-hit.com)
  *
  * Copyright (C) 1999-2005 Igor Pavlov
+ *
+ * SPDX-License-Identifier:	GPL-2.0+ 
  */
 
 /*
@@ -19,7 +20,6 @@
 
 #include <config.h>
 #include <common.h>
-#include <log.h>
 #include <watchdog.h>
 
 #ifdef CONFIG_LZMA
@@ -37,8 +37,8 @@
 static void *SzAlloc(void *p, size_t size) { return malloc(size); }
 static void SzFree(void *p, void *address) { free(address); }
 
-int lzmaBuffToBuffDecompress(unsigned char *outStream, SizeT *uncompressedSize,
-			     const unsigned char *inStream, SizeT length)
+int lzmaBuffToBuffDecompress (unsigned char *outStream, SizeT *uncompressedSize,
+                  unsigned char *inStream,  SizeT  length)
 {
     int res = SZ_ERROR_DATA;
     int i;
@@ -104,7 +104,7 @@ int lzmaBuffToBuffDecompress(unsigned char *outStream, SizeT *uncompressedSize,
     /* Decompress */
     outProcessed = min(outSizeFull, *uncompressedSize);
 
-    schedule();
+    WATCHDOG_RESET();
 
     res = LzmaDecode(
         outStream, &outProcessed,

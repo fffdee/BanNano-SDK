@@ -1,8 +1,7 @@
-/* SPDX-License-Identifier: GPL-2.0 */
 /**
  * gadget.h - DesignWare USB3 DRD Gadget Header
  *
- * Copyright (C) 2015 Texas Instruments Incorporated - https://www.ti.com
+ * Copyright (C) 2015 Texas Instruments Incorporated - http://www.ti.com
  *
  * Authors: Felipe Balbi <balbi@ti.com>,
  *	    Sebastian Andrzej Siewior <bigeasy@linutronix.de>
@@ -12,6 +11,8 @@
  *
  * commit 7a60855972 : usb: dwc3: gadget: fix set_halt() bug with pending
 		       transfers
+ *
+ * SPDX-License-Identifier:     GPL-2.0
  *
  */
 

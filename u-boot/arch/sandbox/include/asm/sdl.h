@@ -1,13 +1,13 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Copyright (c) 2013 Google, Inc
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __SANDBOX_SDL_H
 #define __SANDBOX_SDL_H
 
 #include <errno.h>
-#include <video.h>
 
 #ifdef CONFIG_SANDBOX_SDL
 
@@ -18,20 +18,10 @@
  * @height	Window height in pixels
  * @log2_bpp:	Log to base 2 of the number of bits per pixel. So a 32bpp
  *		display will pass 5, since 2*5 = 32
- * @double_size: true to double the visible size in each direction for high-DPI
- *		displays
- * Return: 0 if OK, -ENODEV if no device, -EIO if SDL failed to initialize
+ * @return 0 if OK, -ENODEV if no device, -EIO if SDL failed to initialize
  *		and -EPERM if the video failed to come up.
  */
-int sandbox_sdl_init_display(int width, int height, int log2_bpp,
-			     bool double_size);
-
-/**
- * sandbox_sdl_remove_display() - Remove the SDL screen
- *
- * Return: 0 if OK, -ENOENT if the SDL had not been inited.
- */
-int sandbox_sdl_remove_display(void);
+int sandbox_sdl_init_display(int width, int height, int log2_bpp);
 
 /**
  * sandbox_sdl_sync() - Sync current U-Boot LCD frame buffer to SDL
@@ -40,7 +30,7 @@ int sandbox_sdl_remove_display(void);
  * user can see it.
  *
  * @lcd_base: Base of frame buffer
- * Return: 0 if screen was updated, -ENODEV is there is no screen.
+ * @return 0 if screen was updated, -ENODEV is there is no screen.
  */
 int sandbox_sdl_sync(void *lcd_base);
 
@@ -51,7 +41,7 @@ int sandbox_sdl_sync(void *lcd_base);
  *
  * @key:	Array to receive keycodes
  * @max_keys:	Size of array
- * Return: number of keycodes found, 0 if none, -ENODEV if no keyboard
+ * @return number of keycodes found, 0 if none, -ENODEV if no keyboard
  */
 int sandbox_sdl_scan_keys(int key[], int max_keys);
 
@@ -59,59 +49,36 @@ int sandbox_sdl_scan_keys(int key[], int max_keys);
  * sandbox_sdl_key_pressed() - check if a particular key is pressed
  *
  * @keycode:	Keycode to check (KEY_... - see include/linux/input.h
- * Return: 0 if pressed, -ENOENT if not pressed. -ENODEV if keybord not
+ * @return 0 if pressed, -ENOENT if not pressed. -ENODEV if keybord not
  * available,
  */
 int sandbox_sdl_key_pressed(int keycode);
 
 /**
- * sandbox_sdl_sound_play() - Play a sound
+ * sandbox_sdl_sound_start() - start playing a sound
  *
- * @data:	Data to play (typically 16-bit)
- * @count:	Number of bytes in data
+ * @frequency:	Frequency of sounds in Hertz
+ * @return 0 if OK, -ENODEV if no sound is available
  */
-int sandbox_sdl_sound_play(const void *data, uint count);
+int sandbox_sdl_sound_start(uint frequency);
 
 /**
  * sandbox_sdl_sound_stop() - stop playing a sound
  *
- * Return: 0 if OK, -ENODEV if no sound is available
+ * @return 0 if OK, -ENODEV if no sound is available
  */
 int sandbox_sdl_sound_stop(void);
 
 /**
  * sandbox_sdl_sound_init() - set up the sound system
  *
- * @rate:	Sample rate to use
- * @channels:	Number of channels to use (1=mono, 2=stereo)
- * Return: 0 if OK, -ENODEV if no sound is available
+ * @return 0 if OK, -ENODEV if no sound is available
  */
-int sandbox_sdl_sound_init(int rate, int channels);
-
-/**
- * sandbox_sdl_set_bpp() - Set the depth of the sandbox display
- *
- * The device must not be active when this function is called. It activiates it
- * before returning.
- *
- * This updates the depth value and adjusts a few other settings accordingly.
- * It must be called before the display is probed.
- *
- * @dev: Device to adjust
- * @l2bpp: depth to set
- * Return: 0 if the device was already active, other error if it fails to probe
- * after the change
- */
-int sandbox_sdl_set_bpp(struct udevice *dev, enum video_log2_bpp l2bpp);
+int sandbox_sdl_sound_init(void);
 
 #else
-static inline int sandbox_sdl_init_display(int width, int height, int log2_bpp,
-					   bool double_size)
-{
-	return -ENODEV;
-}
-
-static inline int sandbox_sdl_remove_display(void)
+static inline int sandbox_sdl_init_display(int width, int height,
+					    int log2_bpp)
 {
 	return -ENODEV;
 }
@@ -136,25 +103,14 @@ static inline int sandbox_sdl_sound_start(uint frequency)
 	return -ENODEV;
 }
 
-static inline int sandbox_sdl_sound_play(const void *data, uint count)
-{
-	return -ENODEV;
-}
-
 static inline int sandbox_sdl_sound_stop(void)
 {
 	return -ENODEV;
 }
 
-static inline int sandbox_sdl_sound_init(int rate, int channels)
+static inline int sandbox_sdl_sound_init(void)
 {
 	return -ENODEV;
-}
-
-static inline int sandbox_sdl_set_bpp(struct udevice *dev,
-				      enum video_log2_bpp l2bpp)
-{
-	return -ENOSYS;
 }
 
 #endif

@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * board.h
  *
@@ -8,7 +7,9 @@
  * Based on:
  * TI AM335x boards information header
  *
- * Copyright (C) 2011, Texas Instruments, Incorporated - https://www.ti.com/
+ * Copyright (C) 2011, Texas Instruments, Incorporated - http://www.ti.com/
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef _BOARD_H_

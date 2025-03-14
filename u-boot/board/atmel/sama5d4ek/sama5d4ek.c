@@ -1,12 +1,11 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright (C) 2014 Atmel
  *		      Bo Shen <voice.shen@atmel.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
-#include <init.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/arch/at91_common.h>
 #include <asm/arch/at91_rstc.h>
@@ -74,7 +73,7 @@ static void sama5d4ek_usb_hw_init(void)
 #ifdef CONFIG_BOARD_LATE_INIT
 int board_late_init(void)
 {
-#ifdef CONFIG_VIDEO
+#ifdef CONFIG_DM_VIDEO
 	at91_video_show_board_info();
 #endif
 	return 0;
@@ -100,6 +99,9 @@ void board_debug_uart_init(void)
 #ifdef CONFIG_BOARD_EARLY_INIT_F
 int board_early_init_f(void)
 {
+#ifdef CONFIG_DEBUG_UART
+	debug_uart_init();
+#endif
 	return 0;
 }
 #endif
@@ -107,7 +109,7 @@ int board_early_init_f(void)
 int board_init(void)
 {
 	/* adress of boot parameters */
-	gd->bd->bi_boot_params = CFG_SYS_SDRAM_BASE + 0x100;
+	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
 
 #ifdef CONFIG_NAND_ATMEL
 	sama5d4ek_nand_hw_init();
@@ -121,8 +123,8 @@ int board_init(void)
 
 int dram_init(void)
 {
-	gd->ram_size = get_ram_size((void *)CFG_SYS_SDRAM_BASE,
-				    CFG_SYS_SDRAM_SIZE);
+	gd->ram_size = get_ram_size((void *)CONFIG_SYS_SDRAM_BASE,
+				    CONFIG_SYS_SDRAM_SIZE);
 	return 0;
 }
 

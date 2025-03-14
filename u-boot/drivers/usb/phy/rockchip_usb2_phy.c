@@ -1,15 +1,12 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright 2016 Rockchip Electronics Co., Ltd
+ *
+ * SPDX-License-Identifier:    GPL-2.0+
  */
 
 #include <common.h>
-#include <hang.h>
-#include <log.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
-#include <linux/bitops.h>
-#include <linux/delay.h>
+#include <libfdt.h>
 
 #include "../gadget/dwc2_udc_otg_priv.h"
 
@@ -42,12 +39,6 @@ struct rockchip_usb2_phy_dt_id {
 	const void	*data;
 };
 
-static const struct rockchip_usb2_phy_cfg rk3066a_pdata = {
-	.port_reset	= {0x00, 12, 12, 0, 1},
-	.soft_con	= {0x08, 2, 2, 0, 1},
-	.suspend	= {0x08, 8, 3, (0x01 << 3), (0x2A << 3)},
-};
-
 static const struct rockchip_usb2_phy_cfg rk3288_pdata = {
 	.port_reset     = {0x00, 12, 12, 0, 1},
 	.soft_con       = {0x08, 2, 2, 0, 1},
@@ -55,8 +46,6 @@ static const struct rockchip_usb2_phy_cfg rk3288_pdata = {
 };
 
 static struct rockchip_usb2_phy_dt_id rockchip_usb2_phy_dt_ids[] = {
-	{ .compatible = "rockchip,rk3066a-usb-phy", .data = &rk3066a_pdata },
-	{ .compatible = "rockchip,rk3188-usb-phy", .data = &rk3288_pdata },
 	{ .compatible = "rockchip,rk3288-usb-phy", .data = &rk3288_pdata },
 	{}
 };
@@ -83,8 +72,8 @@ void otg_phy_init(struct dwc2_udc *dev)
 
 	for (i = 0; i < ARRAY_SIZE(rockchip_usb2_phy_dt_ids); i++) {
 		of_id = &rockchip_usb2_phy_dt_ids[i];
-		if (ofnode_device_is_compatible(pdata->phy_of_node,
-						of_id->compatible)){
+		if (fdt_node_check_compatible(gd->fdt_blob, pdata->phy_of_node,
+					      of_id->compatible) == 0) {
 			phy_cfg = (struct rockchip_usb2_phy_cfg *)of_id->data;
 			break;
 		}

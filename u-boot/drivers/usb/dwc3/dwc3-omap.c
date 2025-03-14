@@ -1,8 +1,7 @@
-// SPDX-License-Identifier: GPL-2.0
 /**
  * dwc3-omap.c - OMAP Specific Glue layer
  *
- * Copyright (C) 2015 Texas Instruments Incorporated - https://www.ti.com
+ * Copyright (C) 2015 Texas Instruments Incorporated - http://www.ti.com
  *
  * Authors: Felipe Balbi <balbi@ti.com>,
  *	    Sebastian Andrzej Siewior <bigeasy@linutronix.de>
@@ -11,15 +10,14 @@
  * to uboot.
  *
  * commit 7ee2566ff5 : usb: dwc3: dwc3-omap: get rid of ->prepare()/->complete()
+ *
+ * SPDX-License-Identifier:     GPL-2.0
  */
 
 #include <common.h>
 #include <malloc.h>
 #include <asm/io.h>
-#include <dm.h>
 #include <dwc3-omap-uboot.h>
-#include <dm/device_compat.h>
-#include <dm/devres.h>
 #include <linux/usb/dwc3-omap.h>
 #include <linux/ioport.h>
 
@@ -119,7 +117,7 @@
 #define USBOTGSS_UTMI_OTG_STATUS_VBUSVALID	(1 << 1)
 
 struct dwc3_omap {
-	struct udevice		*dev;
+	struct device		*dev;
 
 	void __iomem		*base;
 
@@ -379,7 +377,7 @@ int dwc3_omap_uboot_init(struct dwc3_omap_device *omap_dev)
 	struct device		*dev = NULL;
 	struct dwc3_omap	*omap;
 
-	omap = devm_kzalloc((struct udevice *)dev, sizeof(*omap), GFP_KERNEL);
+	omap = devm_kzalloc(dev, sizeof(*omap), GFP_KERNEL);
 	if (!omap)
 		return -ENOMEM;
 
@@ -429,19 +427,19 @@ void dwc3_omap_uboot_exit(int index)
 
 /**
  * dwc3_omap_uboot_interrupt_status - check the status of interrupt
- * @dev: device of this controller
+ * @index: index of this controller
  *
  * Checks the status of interrupts and returns true if an interrupt
  * is detected or false otherwise.
  *
  * Generally called from board file.
  */
-int dwc3_omap_uboot_interrupt_status(struct udevice *dev)
+int dwc3_omap_uboot_interrupt_status(int index)
 {
 	struct dwc3_omap *omap = NULL;
 
 	list_for_each_entry(omap, &dwc3_omap_list, list)
-		if (omap->dev == dev)
+		if (omap->index == index)
 			return dwc3_omap_interrupt(-1, omap);
 
 	return 0;

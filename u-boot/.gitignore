@@ -3,63 +3,50 @@
 # subdirectories here. Add them in the ".gitignore" file
 # in that subdirectory instead.
 #
-# Normal rules (sorted alphabetically)
+# Normal rules
 #
 .*
-!.checkpatch.conf
-*.a
-*.asn1.[ch]
-*.bin
-*.cfgout
-*.cover
-*.dtb
-*.dtbo
-*.dtb.S
-*.elf
-*.exe
-*.gcda
-*.gcno
-*.i
-*.img
-*.lex.c
-*.lst
-*.mod.c
-*.mbx
 *.o
 *.o.*
-*.order
-*.patch
+*.a
 *.s
 *.su
+*.mod.c
+*.i
+*.lst
+*.order
+*.elf
 *.swp
-*.tab.[ch]
+*.bin
+*.patch
+*.cfgtmp
+
+# host programs on Cygwin
+*.exe
 
 # Build tree
-/build*
+/build-*
 
 #
 # Top-level generic files
 #
-fit-dtb.blob*
+fit-dtb.blob
 /MLO*
 /SPL*
 /System.map
-/boards.cfg
-/mkimage-in-simple-bin*
-/simple-bin*
 /u-boot*
-/*.log
+/boards.cfg
 
 #
 # git files that we don't want to ignore even it they are dot-files
 #
 !.gitignore
 !.mailmap
-!.get_maintainer.*
 
 #
 # Generated files
 #
+/LOG
 /spl/
 /tpl/
 /defconfig
@@ -67,8 +54,6 @@ fit-dtb.blob*
 #
 # Generated include files
 #
-/include/autoconf.mk*
-/include/config.h
 /include/config/
 /include/generated/
 
@@ -100,19 +85,3 @@ GTAGS
 *.orig
 *~
 \#*#
-
-# Python cache
-__pycache__
-
-# Python code coverage output (python3-coverage html)
-/htmlcov/
-
-# pylint files
-/pylint.cur
-/pylint.out/
-
-# qconfig database
-/qconfig.db
-
-# Clang's compilation database file
-/compile_commands.json

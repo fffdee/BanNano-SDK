@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2004 Texas Insturments
  *
@@ -8,6 +7,8 @@
  *
  * (C) Copyright 2002
  * Gary Jennejohn, DENX Software Engineering, <garyj@denx.de>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 /*
@@ -16,11 +17,7 @@
 
 #include <common.h>
 #include <command.h>
-#include <cpu_func.h>
-#include <irq_func.h>
-#include <asm/cache.h>
 #include <asm/system.h>
-#include <asm/arm11.h>
 
 static void cache_flush(void);
 
@@ -33,7 +30,7 @@ int cleanup_before_linux (void)
 	 * we turn off caches etc ...
 	 */
 
-	disable_interrupts();
+	disable_interrupts ();
 
 	/* turn off I/D-cache */
 	icache_disable();
@@ -42,11 +39,6 @@ int cleanup_before_linux (void)
 	cache_flush();
 
 	return 0;
-}
-
-void allow_unaligned(void)
-{
-	arm11_arch_cp15_allow_unaligned();
 }
 
 static void cache_flush(void)
@@ -60,7 +52,7 @@ static void cache_flush(void)
 	asm volatile("mcr p15, 0, %0, c7, c10, 4" : : "r" (i));
 }
 
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#ifndef CONFIG_SYS_DCACHE_OFF
 void invalidate_dcache_all(void)
 {
 	asm volatile("mcr p15, 0, %0, c7, c6, 0" : : "r" (0));
@@ -96,7 +88,7 @@ void flush_dcache_range(unsigned long start, unsigned long stop)
 	asm volatile("mcr p15, 0, %0, c7, c10, 4" : : "r" (0));
 }
 
-#else /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#else /* #ifndef CONFIG_SYS_DCACHE_OFF */
 void invalidate_dcache_all(void)
 {
 }
@@ -104,15 +96,15 @@ void invalidate_dcache_all(void)
 void flush_dcache_all(void)
 {
 }
-#endif /* #if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF) */
+#endif /* #ifndef CONFIG_SYS_DCACHE_OFF */
 
-#if !(CONFIG_IS_ENABLED(SYS_ICACHE_OFF) && CONFIG_IS_ENABLED(SYS_DCACHE_OFF))
+#if !defined(CONFIG_SYS_ICACHE_OFF) || !defined(CONFIG_SYS_DCACHE_OFF)
 void enable_caches(void)
 {
-#if !CONFIG_IS_ENABLED(SYS_ICACHE_OFF)
+#ifndef CONFIG_SYS_ICACHE_OFF
 	icache_enable();
 #endif
-#if !CONFIG_IS_ENABLED(SYS_DCACHE_OFF)
+#ifndef CONFIG_SYS_DCACHE_OFF
 	dcache_enable();
 #endif
 }

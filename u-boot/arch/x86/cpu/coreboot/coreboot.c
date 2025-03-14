@@ -1,34 +1,24 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * Copyright (c) 2011 The Chromium OS Authors.
  * (C) Copyright 2008
  * Graeme Russ, graeme.russ@gmail.com.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
-#include <cpu_func.h>
-#include <event.h>
 #include <fdtdec.h>
-#include <init.h>
-#include <usb.h>
-#include <asm/global_data.h>
 #include <asm/io.h>
 #include <asm/msr.h>
 #include <asm/mtrr.h>
-#include <asm/cb_sysinfo.h>
+#include <asm/arch/sysinfo.h>
 #include <asm/arch/timestamp.h>
-#include <dm/ofnode.h>
+
+DECLARE_GLOBAL_DATA_PTR;
 
 int arch_cpu_init(void)
 {
-	int ret;
-
-	ret = IS_ENABLED(CONFIG_X86_RUN_64BIT) ? x86_cpu_reinit_f() :
-		x86_cpu_init_f();
-	if (ret)
-		return ret;
-
-	ret = get_coreboot_info(&lib_sysinfo);
+	int ret = get_coreboot_info(&lib_sysinfo);
 	if (ret != 0) {
 		printf("Failed to parse coreboot tables.\n");
 		return ret;
@@ -36,7 +26,7 @@ int arch_cpu_init(void)
 
 	timestamp_init();
 
-	return 0;
+	return x86_cpu_init_f();
 }
 
 int checkcpu(void)
@@ -49,7 +39,7 @@ int print_cpuinfo(void)
 	return default_print_cpuinfo();
 }
 
-static void board_final_init(void)
+static void board_final_cleanup(void)
 {
 	/*
 	 * Un-cache the ROM so the kernel has one
@@ -65,13 +55,13 @@ static void board_final_init(void)
 	if (top_type == MTRR_TYPE_WRPROT) {
 		struct mtrr_state state;
 
-		mtrr_open(&state, true);
+		mtrr_open(&state);
 		wrmsrl(MTRR_PHYS_BASE_MSR(top_mtrr), 0);
 		wrmsrl(MTRR_PHYS_MASK_MSR(top_mtrr), 0);
-		mtrr_close(&state, true);
+		mtrr_close(&state);
 	}
 
-	if (!ofnode_conf_read_bool("u-boot,no-apm-finalize")) {
+	if (!fdtdec_get_config_bool(gd->fdt_blob, "u-boot,no-apm-finalize")) {
 		/*
 		 * Issue SMI to coreboot to lock down ME and registers
 		 * when allowed via device tree
@@ -81,13 +71,17 @@ static void board_final_init(void)
 	}
 }
 
-static int last_stage_init(void)
+int last_stage_init(void)
 {
-	if (IS_ENABLED(CONFIG_SPL_BUILD))
-		return 0;
+	if (gd->flags & GD_FLG_COLD_BOOT)
+		timestamp_add_to_bootstage();
 
-	board_final_init();
+	board_final_cleanup();
 
 	return 0;
 }
-EVENT_SPY_SIMPLE(EVT_LAST_STAGE_INIT, last_stage_init);
+
+int misc_init_r(void)
+{
+	return 0;
+}

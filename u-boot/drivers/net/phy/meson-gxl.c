@@ -1,10 +1,11 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * Meson GXL Internal PHY Driver
  *
  * Copyright (C) 2015 Amlogic, Inc. All rights reserved.
  * Copyright (C) 2016 BayLibre, SAS. All rights reserved.
  * Author: Neil Armstrong <narmstrong@baylibre.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 #include <config.h>
 #include <common.h>
@@ -73,7 +74,7 @@ restart_aneg:
 
 		if (!(wol & BIT(12)) ||
 			((exp & EXPANSION_NWAY) && !(lpa & LPA_LPACK))) {
-
+			
 			/* Looks like aneg failed after all */
 			if (!retries) {
 				printf("%s LPA corruption max attempts\n",
@@ -124,7 +125,7 @@ static int meson_gxl_phy_config(struct phy_device *phydev)
 	return genphy_config(phydev);
 }
 
-U_BOOT_PHY_DRIVER(meson_gxl_phy) = {
+static struct phy_driver meson_gxl_phy_driver = {
 	.name = "Meson GXL Internal PHY",
 	.uid = 0x01814400,
 	.mask = 0xfffffff0,
@@ -133,3 +134,10 @@ U_BOOT_PHY_DRIVER(meson_gxl_phy) = {
 	.startup = &meson_gxl_startup,
 	.shutdown = &genphy_shutdown,
 };
+
+int phy_meson_gxl_init(void)
+{
+	phy_register(&meson_gxl_phy_driver);
+
+	return 0;
+}

@@ -1,55 +1,46 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * cmd_sdp.c -- sdp command
  *
  * Copyright (C) 2016 Toradex
  * Author: Stefan Agner <stefan.agner@toradex.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
-#include <command.h>
 #include <g_dnl.h>
 #include <sdp.h>
 #include <usb.h>
-#include <linux/printk.h>
 
-static int do_sdp(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
+static int do_sdp(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
-	int controller_index;
-	struct udevice *udc;
-	int ret;
+	int ret = CMD_RET_FAILURE;
 
 	if (argc < 2)
 		return CMD_RET_USAGE;
 
-	controller_index = simple_strtoul(argv[1], NULL, 0);
-	ret = udc_device_get_by_index(controller_index, &udc);
-	if (ret)
-		return ret;
+	char *usb_controller = argv[1];
+	int controller_index = simple_strtoul(usb_controller, NULL, 0);
+	board_usb_init(controller_index, USB_INIT_DEVICE);
 
 	g_dnl_clear_detach();
-	ret = g_dnl_register("usb_dnl_sdp");
-	if (ret) {
-		pr_err("SDP dnl register failed: %d\n", ret);
-		goto exit_register;
-	}
+	g_dnl_register("usb_dnl_sdp");
 
-	ret = sdp_init(udc);
+	ret = sdp_init(controller_index);
 	if (ret) {
-		pr_err("SDP init failed: %d\n", ret);
+		pr_err("SDP init failed: %d", ret);
 		goto exit;
 	}
 
 	/* This command typically does not return but jumps to an image */
-	sdp_handle(udc);
-	pr_err("SDP ended\n");
+	sdp_handle(controller_index);
+	pr_err("SDP ended");
 
 exit:
 	g_dnl_unregister();
-exit_register:
-	udc_device_put(udc);
+	board_usb_cleanup(controller_index, USB_INIT_DEVICE);
 
-	return CMD_RET_FAILURE;
+	return ret;
 }
 
 U_BOOT_CMD(sdp, 2, 1, do_sdp,

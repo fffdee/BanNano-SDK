@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2010
  * Linaro LTD, www.linaro.org
@@ -11,6 +10,8 @@
  * (C) Copyright 2008
  * Marvell Semiconductor <www.marvell.com>
  * Written-by: Prafulla Wadaskar <prafulla@marvell.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include "imagetool.h"
@@ -85,7 +86,7 @@ static void omapimage_print_section(struct ch_settings *chs)
 		chs->flags);
 }
 
-static void omapimage_print_header(const void *ptr, struct image_tool_params *params)
+static void omapimage_print_header(const void *ptr)
 {
 	const struct ch_toc *toc = (struct ch_toc *)ptr;
 	const struct gp_header *gph =
@@ -144,7 +145,7 @@ static void omapimage_set_header(void *ptr, struct stat *sbuf, int ifd,
 	toc++;
 	memset(toc, 0xff, sizeof(*toc));
 
-	gph_set_header(gph, sbuf->st_size - OMAP_CH_HDR_SIZE,
+	gph_set_header(gph, sbuf->st_size - OMAP_CH_HDR_SIZE + GPIMAGE_HDR_SIZE,
 		       params->addr, 0);
 
 	if (strncmp(params->imagename, "byteswap", 8) == 0) {

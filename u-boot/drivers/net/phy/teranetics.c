@@ -1,13 +1,14 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * Teranetics PHY drivers
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  *
  * Copyright 2010-2011 Freescale Semiconductor, Inc.
  * author Andy Fleming
  */
+#include <config.h>
 #include <common.h>
 #include <phy.h>
-#include <linux/delay.h>
 
 #ifndef CONFIG_PHYLIB_10G
 #error The Teranetics PHY needs 10G support
@@ -90,7 +91,7 @@ int tn2020_startup(struct phy_device *phydev)
 	return 0;
 }
 
-U_BOOT_PHY_DRIVER(tn2020) = {
+struct phy_driver tn2020_driver = {
 	.name = "Teranetics TN2020",
 	.uid = PHY_UID_TN2020,
 	.mask = 0xfffffff0,
@@ -102,3 +103,10 @@ U_BOOT_PHY_DRIVER(tn2020) = {
 	.startup = &tn2020_startup,
 	.shutdown = &gen10g_shutdown,
 };
+
+int phy_teranetics_init(void)
+{
+	phy_register(&tn2020_driver);
+
+	return 0;
+}

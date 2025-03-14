@@ -1,15 +1,12 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  *  (C) Copyright 2010
  *  NVIDIA Corporation <www.nvidia.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __ASM_ARCH_TEGRA_DC_H
 #define __ASM_ARCH_TEGRA_DC_H
-
-#ifndef __ASSEMBLY__
-#include <linux/bitops.h>
-#endif
 
 /* Register definitions for the Tegra display controller */
 
@@ -568,13 +565,5 @@ enum {
 #define DC_POLL_TIMEOUT_MS		50
 #define DC_N_WINDOWS			5
 #define DC_REG_SAVE_SPACE		(DC_N_WINDOWS + 5)
-
-#define TEGRA_DSI_A		"dsi@54300000"
-#define TEGRA_DSI_B		"dsi@54400000"
-
-struct tegra_dc_plat {
-	struct udevice *dev;		/* Display controller device */
-	struct dc_ctlr *dc;		/* Display controller regmap */
-};
 
 #endif /* __ASM_ARCH_TEGRA_DC_H */

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * mux.c
  *
@@ -6,11 +5,12 @@
  * Heiko Schocher, DENX Software Engineering, hs@denx.de.
  *
  * Based on:
- * Copyright (C) 2011 Texas Instruments Incorporated - https://www.ti.com/
+ * Copyright (C) 2011 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
-#include <hang.h>
 #include <asm/arch/sys_proto.h>
 #include <asm/arch/hardware.h>
 #include <asm/arch/mux.h>

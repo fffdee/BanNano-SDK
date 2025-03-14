@@ -41,6 +41,9 @@
 	};
 
 	cpus {
+		#address-cells = <0>;
+		#size-cells = <0>;
+
 		cpu {
 			compatible = "arm,arm926ej-s";
 			device_type = "cpu";
@@ -81,14 +84,14 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 		ranges;
-		bootph-all;
+		u-boot,dm-pre-reloc;
 
 		apb {
 			compatible = "simple-bus";
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges;
-			bootph-all;
+			u-boot,dm-pre-reloc;
 
 			aic: interrupt-controller@fffff000 {
 				#interrupt-cells = <3>;
@@ -113,7 +116,7 @@
 				#address-cells = <1>;
 				#size-cells = <0>;
 				#interrupt-cells = <1>;
-				bootph-all;
+				u-boot,dm-pre-reloc;
 
 				main_rc_osc: main_rc_osc {
 					compatible = "atmel,at91sam9x5-clk-main-rc-osc";
@@ -176,7 +179,7 @@
 					atmel,clk-output-range = <0 133333333>;
 					atmel,clk-divisors = <1 2 4 3>;
 					atmel,master-clk-have-div3-pres;
-					bootph-all;
+					u-boot,dm-pre-reloc;
 
 				};
 
@@ -259,7 +262,7 @@
 					#address-cells = <1>;
 					#size-cells = <0>;
 					clocks = <&mck>;
-					bootph-all;
+					u-boot,dm-pre-reloc;
 
 
 					pioAB_clk: pioAB_clk@2 {
@@ -466,12 +469,12 @@
 				       0xfffff800 0x200		/* pioC */
 				       0xfffffa00 0x200		/* pioD */
 				       >;
-				bootph-all;
+				u-boot,dm-pre-reloc;
 
 
 				/* shared pinctrl settings */
 				dbgu {
-					bootph-all;
+					u-boot,dm-pre-reloc;
 					pinctrl_dbgu: dbgu-0 {
 						atmel,pins =
 							<AT91_PIOA 9 AT91_PERIPH_A AT91_PINCTRL_PULL_UP
@@ -1045,6 +1048,8 @@
 			};
 
 			adc0: adc@f804c000 {
+				#address-cells = <1>;
+				#size-cells = <0>;
 				compatible = "atmel,at91sam9x5-adc";
 				reg = <0xf804c000 0x100>;
 				interrupts = <19 IRQ_TYPE_LEVEL_HIGH 0>;
@@ -1180,7 +1185,7 @@
 				};
 			};
 
-			watchdog: watchdog@fffffe40 {
+			watchdog@fffffe40 {
 				compatible = "atmel,at91sam9260-wdt";
 				reg = <0xfffffe40 0x10>;
 				interrupts = <1 IRQ_TYPE_LEVEL_HIGH 7>;

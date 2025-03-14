@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * This file is part of UBIFS.
  *
@@ -6,6 +5,8 @@
  *
  * (C) Copyright 2008-2009
  * Stefan Roese, DENX Software Engineering, sr@denx.de.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  *
  * Authors: Artem Bityutskiy (Битюцкий Артём)
  *          Adrian Hunter
@@ -35,7 +36,6 @@
 #include <asm-generic/atomic-long.h>
 #include <ubi_uboot.h>
 #include <ubifs_uboot.h>
-#include <linux/printk.h>
 
 #include <linux/ctype.h>
 #include <linux/time.h>
@@ -253,10 +253,10 @@ struct inode {
 };
 
 struct super_operations {
-	struct inode *(*alloc_inode)(struct super_block *sb);
+   	struct inode *(*alloc_inode)(struct super_block *sb);
 	void (*destroy_inode)(struct inode *);
 
-	void (*dirty_inode) (struct inode *, int flags);
+   	void (*dirty_inode) (struct inode *, int flags);
 	int (*write_inode) (struct inode *, struct writeback_control *wbc);
 	int (*drop_inode) (struct inode *);
 	void (*evict_inode) (struct inode *);
@@ -317,8 +317,8 @@ struct super_block {
 	struct backing_dev_info *s_bdi;
 #endif
 	struct mtd_info		*s_mtd;
-#ifndef __UBOOT__
 	struct hlist_node	s_instances;
+#ifndef __UBOOT__
 	struct quota_info	s_dquot;	/* Diskquota specific options */
 #endif
 
@@ -327,7 +327,7 @@ struct super_block {
 	char s_id[32];				/* Informational name */
 	u8 s_uuid[16];				/* UUID */
 
-	void			*s_fs_info;	/* Filesystem private info */
+	void 			*s_fs_info;	/* Filesystem private info */
 	unsigned int		s_max_links;
 #ifndef __UBOOT__
 	fmode_t			s_mode;
@@ -432,7 +432,7 @@ struct file {
 #define f_dentry	f_path.dentry
 #define f_vfsmnt	f_path.mnt
 	const struct file_operations	*f_op;
-	unsigned int		f_flags;
+	unsigned int 		f_flags;
 	loff_t			f_pos;
 	unsigned int		f_uid, f_gid;
 
@@ -467,7 +467,7 @@ struct file {
 #if BITS_PER_LONG==32
 #define MAX_LFS_FILESIZE	(((u64)PAGE_CACHE_SIZE << (BITS_PER_LONG-1))-1)
 #elif BITS_PER_LONG==64
-#define MAX_LFS_FILESIZE	0x7fffffffffffffffUL
+#define MAX_LFS_FILESIZE 	0x7fffffffffffffffUL
 #endif
 
 /*
@@ -611,20 +611,16 @@ static inline ino_t parent_ino(struct dentry *dentry)
 /* misc.h */
 #define mutex_lock_nested(...)
 #define mutex_unlock_nested(...)
-#define mutex_is_locked(...)	1
+#define mutex_is_locked(...)	0
 #endif
 
 /* Version of this UBIFS implementation */
 #define UBIFS_VERSION 1
 
 /* Normal UBIFS messages */
-#ifdef CONFIG_UBIFS_SILENCE_MSG
-#define ubifs_msg(c, fmt, ...)
-#else
 #define ubifs_msg(c, fmt, ...)                                      \
 	pr_notice("UBIFS (ubi%d:%d): " fmt "\n",                    \
 		  (c)->vi.ubi_num, (c)->vi.vol_id, ##__VA_ARGS__)
-#endif
 /* UBIFS error messages */
 #ifndef __UBOOT__
 #define ubifs_err(c, fmt, ...)                                      \

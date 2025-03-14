@@ -1,134 +1,88 @@
-// SPDX-License-Identifier: GPL-2.0+
-
-#include <dt-bindings/memory/stm32-sdram.h>
-
 /{
 	clocks {
-		bootph-all;
-	};
-
-	aliases {
-		gpio0 = &gpioa;
-		gpio1 = &gpiob;
-		gpio2 = &gpioc;
-		gpio3 = &gpiod;
-		gpio4 = &gpioe;
-		gpio5 = &gpiof;
-		gpio6 = &gpiog;
-		gpio7 = &gpioh;
-		gpio8 = &gpioi;
-		gpio9 = &gpioj;
-		gpio10 = &gpiok;
-		mmc0 = &sdmmc1;
-		pinctrl0 = &pinctrl;
+		u-boot,dm-pre-reloc;
 	};
 
 	soc {
-		bootph-all;
+		u-boot,dm-pre-reloc;
 		pin-controller {
-			bootph-all;
-		};
-
-		fmc: fmc@52004000 {
-			compatible = "st,stm32h7-fmc";
-			reg = <0x52004000 0x1000>;
-			clocks = <&rcc FMC_CK>;
-
-			pinctrl-0 = <&fmc_pins>;
-			pinctrl-names = "default";
-			status = "okay";
+			u-boot,dm-pre-reloc;
 		};
 	};
 };
 
 &clk_hse {
-	bootph-all;
-};
-
-&clk_i2s {
-	bootph-all;
+	u-boot,dm-pre-reloc;
 };
 
 &clk_lse {
-	bootph-all;
+	u-boot,dm-pre-reloc;
 };
 
-
-&fmc {
-	bootph-all;
-};
-
-&gpioa {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpiob {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpioc {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpiod {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpioe {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpiof {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpiog {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpioh {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpioi {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpioj {
-	bootph-all;
-	compatible = "st,stm32-gpio";
-};
-
-&gpiok {
-	bootph-all;
-	compatible = "st,stm32-gpio";
+&clk_i2s {
+	u-boot,dm-pre-reloc;
 };
 
 &pwrcfg {
-	bootph-all;
+	u-boot,dm-pre-reloc;
 };
 
 &rcc {
-	bootph-all;
+	u-boot,dm-pre-reloc;
 };
 
-&sdmmc1 {
-	compatible = "st,stm32-sdmmc2", "arm,pl18x", "arm,primecell";
+&fmc {
+	u-boot,dm-pre-reloc;
 };
 
-&timer5 {
-	bootph-all;
+&clk_hsi {
+	u-boot,dm-pre-reloc;
 };
 
-&pinctrl {
-	bootph-all;
+&clk_csi {
+	u-boot,dm-pre-reloc;
+};
+
+&gpioa {
+	u-boot,dm-pre-reloc;
+};
+
+&gpiob {
+	u-boot,dm-pre-reloc;
+};
+
+&gpioc {
+	u-boot,dm-pre-reloc;
+};
+
+&gpiod {
+	u-boot,dm-pre-reloc;
+};
+
+&gpioe {
+	u-boot,dm-pre-reloc;
+};
+
+&gpiof {
+	u-boot,dm-pre-reloc;
+};
+
+&gpiog {
+	u-boot,dm-pre-reloc;
+};
+
+&gpioh {
+	u-boot,dm-pre-reloc;
+};
+
+&gpioi {
+	u-boot,dm-pre-reloc;
+};
+
+&gpioj {
+	u-boot,dm-pre-reloc;
+};
+
+&gpiok {
+	u-boot,dm-pre-reloc;
 };

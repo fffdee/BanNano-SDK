@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * MTD device concatenation layer
  *
@@ -7,11 +6,11 @@
  *
  * NAND support by Christian Gan <cgan@iders.ca>
  *
+ * SPDX-License-Identifier:	GPL-2.0+
+ *
  */
 
 #ifndef __UBOOT__
-#include <log.h>
-#include <dm/devres.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -21,9 +20,7 @@
 #include <asm/div64.h>
 #else
 #include <div64.h>
-#include <linux/bug.h>
 #include <linux/compat.h>
-#include <linux/printk.h>
 #endif
 
 #include <linux/mtd/mtd.h>
@@ -339,6 +336,14 @@ concat_write_oob(struct mtd_info *mtd, loff_t to, struct mtd_oob_ops *ops)
 	return -EINVAL;
 }
 
+static void concat_erase_callback(struct erase_info *instr)
+{
+	/* Nothing to do here in U-Boot */
+#ifndef __UBOOT__
+	wake_up((wait_queue_head_t *) instr->priv);
+#endif
+}
+
 static int concat_dev_erase(struct mtd_info *mtd, struct erase_info *erase)
 {
 	int err;
@@ -351,6 +356,7 @@ static int concat_dev_erase(struct mtd_info *mtd, struct erase_info *erase)
 	init_waitqueue_head(&waitq);
 
 	erase->mtd = mtd;
+	erase->callback = concat_erase_callback;
 	erase->priv = (unsigned long) &waitq;
 
 	/*
@@ -490,6 +496,8 @@ static int concat_erase(struct mtd_info *mtd, struct erase_info *instr)
 	if (err)
 		return err;
 
+	if (instr->callback)
+		instr->callback(instr);
 	return 0;
 }
 

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0
 /*
  * This file is part of UBIFS.
  *
@@ -9,21 +8,15 @@
  *
  * Authors: Artem Bityutskiy (Битюцкий Артём)
  *          Adrian Hunter
+ *
+ * SPDX-License-Identifier:	GPL-2.0
  */
 
 #include <common.h>
-#include <env.h>
-#include <gzip.h>
-#include <log.h>
-#include <malloc.h>
 #include <memalign.h>
-#include <asm/global_data.h>
 #include "ubifs.h"
-#include <part.h>
-#include <dm/devres.h>
 #include <u-boot/zlib.h>
 
-#include <linux/compat.h>
 #include <linux/err.h>
 #include <linux/lzo.h>
 
@@ -76,6 +69,24 @@ struct ubifs_compressor *ubifs_compressors[UBIFS_COMPR_TYPES_CNT];
 
 
 #ifdef __UBOOT__
+/* from mm/util.c */
+
+/**
+ * kmemdup - duplicate region of memory
+ *
+ * @src: memory region to duplicate
+ * @len: memory region length
+ * @gfp: GFP mask to use
+ */
+void *kmemdup(const void *src, size_t len, gfp_t gfp)
+{
+	void *p;
+
+	p = kmalloc(len, gfp);
+	if (p)
+		memcpy(p, src, len);
+	return p;
+}
 
 struct crypto_comp {
 	int compressor;
@@ -115,7 +126,6 @@ crypto_comp_decompress(const struct ubifs_info *c, struct crypto_comp *tfm,
 {
 	struct ubifs_compressor *compr = ubifs_compressors[tfm->compressor];
 	int err;
-	size_t tmp_len = *dlen;
 
 	if (compr->compr_type == UBIFS_COMPR_NONE) {
 		memcpy(dst, src, slen);
@@ -123,12 +133,11 @@ crypto_comp_decompress(const struct ubifs_info *c, struct crypto_comp *tfm,
 		return 0;
 	}
 
-	err = compr->decompress(src, slen, dst, &tmp_len);
+	err = compr->decompress(src, slen, dst, (size_t *)dlen);
 	if (err)
 		ubifs_err(c, "cannot decompress %d bytes, compressor %s, "
 			  "error %d", slen, compr->name, err);
 
-	*dlen = tmp_len;
 	return err;
 
 	return 0;
@@ -200,6 +209,12 @@ int ubifs_decompress(const struct ubifs_info *c, const void *in_buf,
 static int __init compr_init(struct ubifs_compressor *compr)
 {
 	ubifs_compressors[compr->compr_type] = compr;
+
+#ifdef CONFIG_NEEDS_MANUAL_RELOC
+	ubifs_compressors[compr->compr_type]->name += gd->reloc_off;
+	ubifs_compressors[compr->compr_type]->capi_name += gd->reloc_off;
+	ubifs_compressors[compr->compr_type]->decompress += gd->reloc_off;
+#endif
 
 	if (compr->capi_name) {
 		compr->cc = crypto_alloc_comp(compr->capi_name, 0, 0);
@@ -335,9 +350,7 @@ static int ubifs_printdir(struct file *file, void *dirent)
 		dbg_gen("feed '%s', ino %llu, new f_pos %#x",
 			dent->name, (unsigned long long)le64_to_cpu(dent->inum),
 			key_hash_flash(c, &dent->key));
-#ifndef __UBOOT__
 		ubifs_assert(le64_to_cpu(dent->ch.sqnum) > ubifs_inode(dir)->creat_sqnum);
-#endif
 
 		nm.len = le16_to_cpu(dent->nlen);
 		over = filldir(c, (char *)dent->name, nm.len,
@@ -419,9 +432,7 @@ static int ubifs_finddir(struct super_block *sb, char *dirname,
 		dbg_gen("feed '%s', ino %llu, new f_pos %#x",
 			dent->name, (unsigned long long)le64_to_cpu(dent->inum),
 			key_hash_flash(c, &dent->key));
-#ifndef __UBOOT__
 		ubifs_assert(le64_to_cpu(dent->ch.sqnum) > ubifs_inode(dir)->creat_sqnum);
-#endif
 
 		nm.len = le16_to_cpu(dent->nlen);
 		if ((strncmp(dirname, (char *)dent->name, nm.len) == 0) &&
@@ -546,7 +557,7 @@ static unsigned long ubifs_findfile(struct super_block *sb, char *filename)
 	return 0;
 }
 
-int ubifs_set_blk_dev(struct blk_desc *rbdd, struct disk_partition *info)
+int ubifs_set_blk_dev(struct blk_desc *rbdd, disk_partition_t *info)
 {
 	if (rbdd) {
 		debug("UBIFS cannot be used with normal block devices\n");
@@ -782,8 +793,6 @@ static int do_readpage(struct ubifs_info *c, struct inode *inode,
 
 				if (last_block_size)
 					dlen = last_block_size;
-				else if (ret)
-					dlen = UBIFS_BLOCK_SIZE;
 				else
 					dlen = le32_to_cpu(dn->size);
 
@@ -919,12 +928,12 @@ void ubifs_close(void)
 }
 
 /* Compat wrappers for common/cmd_ubifs.c */
-int ubifs_load(char *filename, unsigned long addr, u32 size)
+int ubifs_load(char *filename, u32 addr, u32 size)
 {
 	loff_t actread;
 	int err;
 
-	printf("Loading file '%s' to addr 0x%08lx...\n", filename, addr);
+	printf("Loading file '%s' to addr 0x%08x...\n", filename, addr);
 
 	err = ubifs_read(filename, (void *)(uintptr_t)addr, 0, size, &actread);
 	if (err == 0) {

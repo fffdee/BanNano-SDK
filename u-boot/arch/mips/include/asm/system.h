@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 1994 - 1999 by Ralf Baechle
  * Copyright (C) 1996 by Paul M. Antoine
@@ -9,6 +8,8 @@
  *
  * Kevin D. Kissell, kevink@mips.org and Carsten Langgaard, carstenl@mips.com
  * Copyright (C) 2000 MIPS Technologies, Inc.
+ *
+ * SPDX-License-Identifier:	GPL-2.0
  */
 #ifndef _ASM_SYSTEM_H
 #define _ASM_SYSTEM_H
@@ -281,25 +282,5 @@ static inline void instruction_hazard_barrier(void)
 	"1:	.insn"
 	: "=&r"(tmp));
 }
-
-#ifdef CONFIG_SYS_NONCACHED_MEMORY
-/* 1MB granularity */
-#define MMU_SECTION_SHIFT	20
-#define MMU_SECTION_SIZE	(1 << MMU_SECTION_SHIFT)
-
-/**
- * noncached_init() - Initialize non-cached memory region
- *
- * Initialize non-cached memory area. This memory region will be typically
- * located right below the malloc() area and be accessed from KSEG1.
- *
- * It is called during the generic post-relocation init sequence.
- *
- * Return: 0 if OK
- */
-int noncached_init(void);
-
-phys_addr_t noncached_alloc(size_t size, size_t align);
-#endif /* CONFIG_SYS_NONCACHED_MEMORY */
 
 #endif /* _ASM_SYSTEM_H */

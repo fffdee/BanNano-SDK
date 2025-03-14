@@ -1,12 +1,13 @@
-/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Exynos pinctrl driver header.
  * Copyright (C) 2016 Samsung Electronics
  * Thomas Abraham <thomas.ab@samsung.com>
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef __PINCTRL_EXYNOS_H_
-#define __PINCTRL_EXYNOS_H_
+#define __PINCTRL_EXYNOS__H_
 
 #define PIN_CON		0x00	/* Offset of pin function register */
 #define PIN_DAT		0x04	/* Offset of pin data register */

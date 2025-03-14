@@ -10,10 +10,10 @@
 
 / {
 	model = "Lichee Pi Nano";
-	compatible = "licheepi,licheepi-nano", "allwinner,suniv-f1c100s";
+	compatible = "licheepi,licheepi-nano", "allwinner,suniv-f1c100s",
+		     "allwinner,suniv";
 
 	aliases {
-		mmc0 = &mmc0;
 		serial0 = &uart0;
 		spi0 = &spi0;
 	};
@@ -21,26 +21,15 @@
 	chosen {
 		stdout-path = "serial0:115200n8";
 	};
-
-	reg_vcc3v3: vcc3v3 {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc3v3";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-	};
 };
 
-&mmc0 {
-	broken-cd;
-	bus-width = <4>;
-	disable-wp;
+&otg_sram {
 	status = "okay";
-	vmmc-supply = <&reg_vcc3v3>;
 };
 
 &spi0 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&spi0_pc_pins>;
+	pinctrl-0 = <&spi0_pins_a>;
 	status = "okay";
 
 	flash@0 {
@@ -52,13 +41,9 @@
 	};
 };
 
-&otg_sram {
-	status = "okay";
-};
-
 &uart0 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&uart0_pe_pins>;
+	pinctrl-0 = <&uart0_pins_a>;
 	status = "okay";
 };
 
@@ -68,6 +53,6 @@
 };
 
 &usbphy {
-	usb0_id_det-gpios = <&pio 4 2 GPIO_ACTIVE_HIGH>; /* PE2 */
+	usb0_id_det-gpio = <&pio 4 2 GPIO_ACTIVE_HIGH>; /* PE2 */
 	status = "okay";
 };

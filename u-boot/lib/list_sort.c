@@ -1,6 +1,4 @@
 #ifndef __UBOOT__
-#include <log.h>
-#include <dm/devres.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/slab.h>
@@ -8,7 +6,6 @@
 #include <linux/compat.h>
 #include <common.h>
 #include <malloc.h>
-#include <linux/printk.h>
 #endif
 #include <linux/list.h>
 #include <linux/list_sort.h>

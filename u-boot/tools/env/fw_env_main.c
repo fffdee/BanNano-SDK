@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: GPL-2.0+
 /*
  * (C) Copyright 2000-2008
  * Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+ *
+ * SPDX-License-Identifier:	GPL-2.0+
  */
 
 /*
@@ -26,7 +27,6 @@
  * of AES key), eg. '-a aabbccddeeff00112233445566778899'.
  */
 
-#include <env.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <stdio.h>
@@ -46,7 +46,7 @@ static struct option long_options[] = {
 	{"config", required_argument, NULL, 'c'},
 	{"help", no_argument, NULL, 'h'},
 	{"script", required_argument, NULL, 's'},
-	{"noheader", no_argument, NULL, 'n'},
+	{"noheader", required_argument, NULL, 'n'},
 	{"lock", required_argument, NULL, 'l'},
 	{"version", no_argument, NULL, 'v'},
 	{NULL, 0, NULL, 0}
@@ -73,7 +73,7 @@ void usage_printenv(void)
 		" -c, --config         configuration file, default:" CONFIG_FILE "\n"
 #endif
 		" -n, --noheader       do not repeat variable name in output\n"
-		" -l, --lock           lock node, default:/run\n"
+		" -l, --lock           lock node, default:/var/lock\n"
 		"\n");
 }
 
@@ -88,7 +88,7 @@ void usage_env_set(void)
 #ifdef CONFIG_FILE
 		" -c, --config         configuration file, default:" CONFIG_FILE "\n"
 #endif
-		" -l, --lock           lock node, default:/run\n"
+		" -l, --lock           lock node, default:/var/lock\n"
 		" -s, --script         batch mode to minimize writes\n"
 		"\n"
 		"Examples:\n"
@@ -206,7 +206,7 @@ int parse_setenv_args(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	char *lockname = "/run/" CMD_PRINTENV ".lock";
+	char *lockname = "/var/lock/" CMD_PRINTENV ".lock";
 	int lockfd = -1;
 	int retval = EXIT_SUCCESS;
 	char *_cmdname;
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
 	argv += optind;
 
 	if (env_opts.lockname) {
-		lockname = malloc(strlen(env_opts.lockname) +
+		lockname = malloc(sizeof(env_opts.lockname) +
 				sizeof(CMD_PRINTENV) + 10);
 		if (!lockname) {
 			fprintf(stderr, "Unable allocate memory");

@@ -1,6 +1,7 @@
-/* SPDX-License-Identifier: BSD-2-Clause */
 /*
  * U-Boot ARM EFI linker script
+ *
+ * SPDX-License-Identifier:	BSD-2-Clause
  *
  * Modified from elf_arm_efi.lds in gnu-efi
  */
@@ -18,7 +19,7 @@ SECTIONS
 		*(.gnu.linkonce.t.*)
 		*(.srodata)
 		*(.rodata*)
-		. = ALIGN(512);
+		. = ALIGN(16);
 	}
 	_etext = .;
 	_text_size = . - _text;
@@ -44,7 +45,7 @@ SECTIONS
 		*(.bss)
 		*(.bss.*)
 		*(COMMON)
-		. = ALIGN(512);
+		. = ALIGN(16);
 		_bss_end = .;
 		_edata = .;
 	}

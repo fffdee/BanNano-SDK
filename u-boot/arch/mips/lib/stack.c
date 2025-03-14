@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: GPL-2.0+
+/*
+ * SPDX-License-Identifier:	GPL-2.0+
+ */
 
-#include <init.h>
-#include <log.h>
-#include <asm/global_data.h>
+#include <common.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
