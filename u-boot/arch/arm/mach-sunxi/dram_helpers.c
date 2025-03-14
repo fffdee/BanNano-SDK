@@ -1,12 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0+
 /*
  * DRAM init helper functions
  *
  * (C) Copyright 2015 Hans de Goede <hdegoede@redhat.com>
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #include <common.h>
+#include <time.h>
 #include <asm/barriers.h>
 #include <asm/io.h>
 #include <asm/arch/dram.h>
@@ -33,11 +33,11 @@ void mctl_await_completion(u32 *reg, u32 mask, u32 val)
 bool mctl_mem_matches(u32 offset)
 {
 	/* Try to write different values to RAM at two addresses */
-	writel(0, CONFIG_SYS_SDRAM_BASE);
-	writel(0xaa55aa55, (ulong)CONFIG_SYS_SDRAM_BASE + offset);
+	writel(0, CFG_SYS_SDRAM_BASE);
+	writel(0xaa55aa55, (ulong)CFG_SYS_SDRAM_BASE + offset);
 	dsb();
 	/* Check if the same value is actually observed when reading back */
-	return readl(CONFIG_SYS_SDRAM_BASE) ==
-	       readl((ulong)CONFIG_SYS_SDRAM_BASE + offset);
+	return readl(CFG_SYS_SDRAM_BASE) ==
+	       readl((ulong)CFG_SYS_SDRAM_BASE + offset);
 }
 #endif

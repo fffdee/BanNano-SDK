@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Chip-specific header file for the AT91SAM9M1x family
  *
@@ -5,8 +6,6 @@
  *
  * Definitions for the SoC:
  * AT91SAM9G45
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 
 #ifndef AT91SAM9G45_H
@@ -133,7 +132,7 @@
 #define ATMEL_BASE_CS7		0x80000000
 
 /* Timer */
-#define CONFIG_SYS_TIMER_COUNTER	0xfffffd3c
+#define CFG_SYS_TIMER_COUNTER	0xfffffd3c
 
 /*
  * Other misc defines

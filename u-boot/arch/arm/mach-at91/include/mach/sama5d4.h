@@ -1,10 +1,9 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * Chip-specific header file for the SAMA5D4 SoC
  *
  * Copyright (C) 2014 Atmel
  *		      Bo Shen <voice.shen@atmel.com>
- *
- * SPDX-License-Identifier:     GPL-2.0+
  */
 
 #ifndef __SAMA5D4_H
@@ -218,7 +217,7 @@
 		(get_extension_chip_id() == ARCH_EXID_SAMA5D44))
 
 /* Timer */
-#define CONFIG_SYS_TIMER_COUNTER	0xfc06863c
+#define CFG_SYS_TIMER_COUNTER	0xfc06863c
 
 /*
  * No PMECC Galois table in ROM

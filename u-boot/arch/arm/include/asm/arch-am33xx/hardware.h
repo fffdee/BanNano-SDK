@@ -1,11 +1,10 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * hardware.h
  *
  * hardware specific header
  *
- * Copyright (C) 2013, Texas Instruments, Incorporated - http://www.ti.com/
- *
- * SPDX-License-Identifier:	GPL-2.0+
+ * Copyright (C) 2013, Texas Instruments, Incorporated - https://www.ti.com/
  */
 
 #ifndef __AM33XX_HARDWARE_H
@@ -15,10 +14,6 @@
 #include <asm/arch/omap.h>
 #ifdef CONFIG_AM33XX
 #include <asm/arch/hardware_am33xx.h>
-#elif defined(CONFIG_TI816X)
-#include <asm/arch/hardware_ti816x.h>
-#elif defined(CONFIG_TI814X)
-#include <asm/arch/hardware_ti814x.h>
 #elif defined(CONFIG_AM43XX)
 #include <asm/arch/hardware_am43xx.h>
 #endif

@@ -1,11 +1,10 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * hardware_am33xx.h
  *
  * AM33xx hardware specific header
  *
- * Copyright (C) 2013, Texas Instruments, Incorporated - http://www.ti.com/
- *
- * SPDX-License-Identifier:	GPL-2.0+
+ * Copyright (C) 2013, Texas Instruments, Incorporated - https://www.ti.com/
  */
 
 #ifndef __AM33XX_HARDWARE_AM33XX_H

@@ -1,16 +1,13 @@
+/* SPDX-License-Identifier: GPL-2.0+ */
 /*
  * (C) Copyright 2010
  * Texas Instruments, <www.ti.com>
  *
  *	Aneesh V <aneesh@ti.com>
  *	Sricharan R <r.sricharan@ti.com>
- *
- * SPDX-License-Identifier:	GPL-2.0+
  */
 #ifndef _CLOCKS_OMAP5_H_
 #define _CLOCKS_OMAP5_H_
-#include <common.h>
-#include <asm/omap_common.h>
 
 /*
  * Assuming a maximum of 1.5 GHz ARM speed and a minimum of 2 cycles per
@@ -135,7 +132,10 @@
 
 /* CM_L3INIT_HSMMCn_CLKCTRL */
 #define HSMMC_CLKCTRL_CLKSEL_MASK		(1 << 24)
-#define HSMMC_CLKCTRL_CLKSEL_DIV_MASK		(1 << 25)
+#define HSMMC_CLKCTRL_CLKSEL_DIV_MASK		(3 << 25)
+
+/* CM_IPU1_IPU1_CLKCTRL CLKSEL MASK */
+#define IPU1_CLKCTRL_CLKSEL_MASK		BIT(24)
 
 /* CM_L3INIT_SATA_CLKCTRL */
 #define SATA_CLKCTRL_OPTFCLKEN_MASK		(1 << 8)
